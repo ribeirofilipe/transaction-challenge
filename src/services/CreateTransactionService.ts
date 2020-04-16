@@ -11,7 +11,7 @@ import Category from '../models/Category';
 interface Request {
   title: string;
   value: number;
-  type: Type;
+  type: string;
   category: string;
 }
 
