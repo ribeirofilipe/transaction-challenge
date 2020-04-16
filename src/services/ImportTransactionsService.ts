@@ -1,6 +1,4 @@
-import path from 'path';
-import neatCsv from 'neat-csv';
-import fs from 'fs';
+import csv from 'csvtojson';
 import uploadConfig from '../config/upload';
 import CreateTransactionService from './CreateTransactionService';
 import Transaction from '../models/Transaction';
@@ -12,32 +10,33 @@ interface Request {
 
 class ImportTransactionsService {
   async execute({ filename }: Request): Promise<Transaction[]> {
-    const userAvatarFilePath = path.join(uploadConfig.directory, filename);
+    const createTransaction = new CreateTransactionService();
 
-    const createTranscation = new CreateTransactionService();
+    const transactions = (await csv().fromFile(
+      `${uploadConfig.directory}/${filename}`,
+    )) as Transaction[];
 
-    const data = await fs.promises.readFile(userAvatarFilePath);
+    const incomes = this.getTypes(transactions, Type.INCOME);
 
-    const transactions = (await neatCsv(data)) as Transaction[];
+    const outcomes = this.getTypes(transactions, Type.OUTCOME);
 
-    const incomes = transactions.filter(
-      transaction => transaction.type === Type.INCOME,
-    );
-    const outcomes = transactions.filter(
-      transaction => transaction.type === Type.OUTCOME,
-    );
-
-    const promises = incomes.map(async transaction =>
-      this.createTransaction(createTranscation, transaction),
+    await Promise.all(
+      incomes.map(async transaction => {
+        return this.createTransaction(createTransaction, transaction);
+      }),
     );
 
-    await Promise.all(promises);
-
-    outcomes.map(async transaction =>
-      this.createTransaction(createTranscation, transaction),
+    await Promise.all(
+      outcomes.map(async transaction => {
+        return this.createTransaction(createTransaction, transaction);
+      }),
     );
 
     return transactions;
+  }
+
+  private getTypes(transactions: Transaction[], type: Type): Transaction[] {
+    return transactions.filter(transaction => transaction.type === type);
   }
 
   private async createTransaction(

@@ -24,7 +24,7 @@ class CreateTransactionService {
   }: Request): Promise<Transaction> {
     const transactionsRepository = getCustomRepository(TransactionsRepository);
 
-    if (type !== Type.INCOME && type !== Type.OUTCOME) {
+    if (!type.includes(Type.INCOME) && !type.includes(Type.OUTCOME)) {
       throw new AppError('Type accepts only income or outcome');
     }
 
