@@ -1,8 +1,28 @@
-// import AppError from '../errors/AppError';
+import { getRepository } from 'typeorm';
+import { isUuid } from 'uuidv4';
+import AppError from '../errors/AppError';
+
+import Transaction from '../models/Transaction';
+
+interface Request {
+  id: string;
+}
 
 class DeleteTransactionService {
-  public async execute(): Promise<void> {
-    // TODO
+  public async execute({ id }: Request): Promise<void> {
+    const transactionsRepository = getRepository(Transaction);
+
+    if (!isUuid(id)) {
+      throw new AppError('Invalid id format');
+    }
+
+    const transaction = await transactionsRepository.findOne({ id });
+
+    if (!transaction) {
+      throw new AppError('Transaction not found');
+    }
+
+    await transactionsRepository.remove(transaction);
   }
 }
 

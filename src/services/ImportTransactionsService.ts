@@ -1,7 +1,7 @@
-import Transaction from '../models/Transaction';
+// import Transaction from '../models/Transaction';
 
 class ImportTransactionsService {
-  async execute(): Promise<Transaction[]> {
+  async execute(): Promise<void> {
     // TODO
   }
 }
