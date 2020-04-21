@@ -46,7 +46,7 @@ class ImportTransactionsService {
     await createTransaction.execute({
       title: transaction.title,
       type: transaction.type,
-      category: transaction.category,
+      category: transaction.category.toString(),
       value: transaction.value,
     });
   }
